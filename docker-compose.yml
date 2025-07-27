@@ -1,0 +1,9 @@
+services:
+  2bnot2b:
+    build: . 
+    ports:
+      - "8000:8000"  # Web interface
+      - "11434:11434"  # Ollama API
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
