@@ -50,3 +50,12 @@ docker compose up -d
 ## Retrieval
 1. For a given query, retrieve documents from vector data based on similarity search
 2. With using metadata can show source for response
+
+## LLM Integration
+1. Using Gemma3n model
+ - Tried couple issues current local resources, 
+2. Using a standard prompt to test flow and sources currently using all relevant top 5 docs, can optimise on similarity score if large docs
+3. Model Options
+ - Temperature 0.7 randomness in text generation
+ - Top_p 0.5 for focused response
+ - Max_tokens 500 For short response can be configurable in UI

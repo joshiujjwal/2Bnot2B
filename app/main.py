@@ -12,8 +12,8 @@ from fastapi.responses import JSONResponse
 app = FastAPI()
 
 # Setup templates and static files
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Initialize RAG system
 rag = RAG()
