@@ -2,15 +2,26 @@ import logging
 import os
 import re
 from typing import List, Dict, Optional
+import chromadb
+from sentence_transformers import SentenceTransformer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RAG:
-    def __init__(self):
+    def __init__(self, embedding_model_name="sentence-transformers/all-MiniLM-L6-v2"):
         """Initialize RAG system components"""
         logger.info("Initializing RAG system...")
         self.processed_documents = {}  # Track processed docs
+
+        # Initialize embedding model
+        logger.info(f"Loading embedding model: {embedding_model_name}")
+        self.embedding_model = SentenceTransformer(embedding_model_name)
+        
+        # Initialize ChromaDB
+        logger.info("Initializing ChromaDB...")
+        self.client = chromadb.PersistentClient(path="./chroma_db")
+        self.collection = self.client.get_or_create_collection("documents")
         
     def extract_text_from_file(self, file_path: str) -> str:
         """Extract text from various file formats"""
@@ -77,8 +88,33 @@ class RAG:
             
             # Create chunks
             chunks = self.chunk_text(clean_text)
+
+             # Generate embeddings
+            logger.info("Generating embeddings...")
+            embeddings = self.embedding_model.encode(chunks).tolist()
             
-            logger.info(f"Successfully processed {document_name}: {len(chunks)} chunks")
+            # Create unique IDs and metadata
+            ids = [f"{document_name}_chunk_{i}" for i in range(len(chunks))]
+            metadatas = [
+                {
+                    "source": document_name,
+                    "chunk_id": i,
+                    "chunk_size": len(chunk),
+                    "file_path": file_path
+                }
+                for i, chunk in enumerate(chunks)
+            ]
+            
+            # Add to ChromaDB
+            logger.info("Storing in vector database...")
+            self.collection.add(
+                embeddings=embeddings,
+                documents=chunks,
+                ids=ids,
+                metadatas=metadatas
+            )
+            
+            logger.info(f"Successfully added {len(chunks)} chunks from {document_name} to vector database")
             return True
             
         except Exception as e:

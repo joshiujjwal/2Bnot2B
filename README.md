@@ -40,3 +40,9 @@ docker compose up -d
 1. Chunk Size and Overlap for storing data
     - Current 1000 Larger Size more context, less precision
     - Overlap 200 
+
+## Vector Database and Embeddings
+1. Using Sentence Transformers to convert text to fixed size vectors
+    - Using pretrained model all-MiniLM-L6-v2
+    - Lightweight for Local apps not accurate as larger models or APIs
+2. Vector storage for data Chroma
