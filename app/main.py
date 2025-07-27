@@ -67,5 +67,22 @@ async def upload_file(file: UploadFile = File(...)):
             "message": f"Error uploading file: {str(e)}"
         })
 
+@app.post("/query")
+async def query_rag(question: str = Form(...)):
+    try:
+        result = rag.query(question)
+        return JSONResponse({
+            "status": "success",
+            "answer": result['answer'],
+            "sources": result['sources'],
+            "source_count": result['source_count'],
+            "retrieval_info": result.get('retrieval_info', {})
+        })
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "message": f"Error processing query: {str(e)}"
+        })
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

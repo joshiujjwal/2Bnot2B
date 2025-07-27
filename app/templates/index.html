@@ -36,6 +36,13 @@
             display: none;
         }
 
+        textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .response { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: left; }
+        .source-item { background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .source-meta { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .similarity-score { background: #e3f2fd; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; display: inline-block; }
+        .search-section { background: white; padding: 30px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
     </style>
 </head>
 
@@ -50,6 +57,18 @@
         </div>
 
         <div id="upload-status"></div>
+
+        <div class="search-section">
+            <h3>Query with Semantic Search</h3>
+            <textarea id="question" placeholder="Ask a question about your documents..." rows="3"></textarea>
+            <div>
+                <button onclick="askQuestion()">Query</button>
+            </div>
+        </div>
+        
+        <div id="response" class="response" style="display: none;"></div>
+
+
     </div>
 
     <script>
@@ -82,6 +101,67 @@
             } catch (error) {
                 document.getElementById('upload-status').innerHTML =
                     `<p style="color: red">Error: ${error.message}</p>`;
+            }
+        }
+        async function askQuestion() {
+            const question = document.getElementById('question').value.trim();
+            if (!question) return;
+            
+            const formData = new FormData();
+            formData.append('question', question);
+            
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    let sourcesHtml = '';
+                    if (result.sources && result.sources.length > 0) {
+                        sourcesHtml = result.sources.map((source, index) => `
+                            <div class="source-item">
+                                <div class="source-meta">
+                                    <strong>Rank ${source.rank || index + 1}:</strong> ${source.metadata.source} 
+                                    (Chunk ${source.metadata.chunk_id + 1})
+                                    <span class="similarity-score">Similarity: ${(source.similarity_score || 0).toFixed(3)}</span>
+                                </div>
+                                <div>${source.content.substring(0, 300)}...</div>
+                            </div>
+                        `).join('');
+                    }
+                    
+                    let retrievalInfo = '';
+                    if (result.retrieval_info) {
+                        retrievalInfo = `
+                            <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                                <strong>🔍 Retrieval Stats:</strong><br>
+                                • Searched ${result.retrieval_info.total_chunks_searched} chunks<br>
+                                • Found ${result.retrieval_info.relevant_chunks_found} relevant results<br>
+                                • Best match similarity: ${(result.retrieval_info.best_similarity_score || 0).toFixed(3)}
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('response').innerHTML = `
+                        <h4>📝 Answer:</h4>
+                        <p>${result.answer.replace(/\n/g, '<br>')}</p>
+                        ${retrievalInfo}
+                        <h4>📚 Retrieved Sources (${result.source_count}):</h4>
+                        ${sourcesHtml}
+                    `;
+                    document.getElementById('response').style.display = 'block';
+                } else {
+                    document.getElementById('response').innerHTML = 
+                        `<p style="color: red">Error: ${result.message}</p>`;
+                    document.getElementById('response').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('response').innerHTML = 
+                    `<p style="color: red">Error: ${error.message}</p>`;
+                document.getElementById('response').style.display = 'block';
             }
         }
     </script>

@@ -46,3 +46,7 @@ docker compose up -d
     - Using pretrained model all-MiniLM-L6-v2
     - Lightweight for Local apps not accurate as larger models or APIs
 2. Vector storage for data Chroma
+
+## Retrieval
+1. For a given query, retrieve documents from vector data based on similarity search
+2. With using metadata can show source for response
