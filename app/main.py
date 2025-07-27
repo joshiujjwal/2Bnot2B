@@ -84,5 +84,25 @@ async def query_rag(question: str = Form(...)):
             "message": f"Error processing query: {str(e)}"
         })
 
+@app.get("/chunk/{source}/{chunk_id}")
+async def get_chunk(source: str, chunk_id: int):
+    try:
+        chunk_data = rag.get_chunk(source, chunk_id)
+        if chunk_data:
+            return JSONResponse({
+                "status": "success",
+                "chunk": chunk_data
+            })
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": "Chunk not found"
+            })
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "message": f"Error retrieving chunk: {str(e)}"
+        })
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

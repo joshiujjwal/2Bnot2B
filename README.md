@@ -30,10 +30,15 @@ Local Retrieval-Augmented Generation (RAG) on The Complete Works of William Shak
 git clone https://github.com/joshiujjwal/2Bnot2B.git
 cd 2Bnot2B
 ```
-2. Build and run
+2. Build and run ( Takes some time to pull model etc )
 ```bash
 docker compose up -d
 ```
+3. Navigate to http://localhost:8000 
+4. [Upload Documents](http://localhost:8000/#upload)
+ - Select input_data/julius_caesar/julius-caesar-full.txt file
+5. [Summarize Plays](http://localhost:8000/#plays)
+- Tragedy > Julius Caesar
 
 # Key Design TradeOff
 ## Document Processing 
@@ -59,3 +64,15 @@ docker compose up -d
  - Temperature 0.7 randomness in text generation
  - Top_p 0.5 for focused response
  - Max_tokens 500 For short response can be configurable in UI
+
+ ## For UI
+ - Upload Documents
+ - Intearctive Summary for The Complete Works of William Shakespeare based on category
+ - Chat Interface for additional questions
+ - In Response, added Source and its chunks retrival for text source
+ - Theme Green based on The term "green-eyed monster" from Othello, referencing jealousy, highlights Shakespeare's use of green in the context of human emotions.
+
+ ## Notes
+ - No RAG background
+ - Understood from YT and LLM Chats
+ - Used Cursor for code generation assistance

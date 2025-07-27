@@ -165,6 +165,37 @@ class RAG:
            logger.error(f"Error retrieving documents: {str(e)}")
            return []
    
+    def get_chunk(self, source: str, chunk_id: int) -> Optional[Dict]:
+        """Retrieve a specific chunk by source and chunk ID"""
+        try:
+            logger.info(f"Retrieving chunk {chunk_id} from {source}")
+            
+            # Create the chunk ID as stored in ChromaDB
+            chunk_id_str = f"{source}_chunk_{chunk_id}"
+            
+            # Query the specific chunk
+            results = self.collection.get(
+                ids=[chunk_id_str],
+                include=['documents', 'metadatas']
+            )
+            
+            if results['documents'] and len(results['documents']) > 0:
+                chunk_data = {
+                    'content': results['documents'][0],
+                    'metadata': results['metadatas'][0],
+                    'chunk_id': chunk_id,
+                    'source': source
+                }
+                logger.info(f"Successfully retrieved chunk {chunk_id} from {source}")
+                return chunk_data
+            else:
+                logger.warning(f"Chunk {chunk_id} not found in {source}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error retrieving chunk {chunk_id} from {source}: {str(e)}")
+            return None
+    
     def query(self, question: str) -> Dict:
         """Query the RAG system with retrieval"""
         logger.info(f"Processing query: {question}")

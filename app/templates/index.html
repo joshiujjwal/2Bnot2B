@@ -1,292 +1,542 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2B Not 2B</title>
+    <title>2B Not 2B - Shakespeare Works Explorer</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.ico">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            text-align: center;
-            background: #f5f5f5;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .upload-area {
-            border: 2px dashed #ccc;
-            padding: 40px;
-            margin: 20px 0;
-            cursor: pointer;
-        }
-
-        .upload-area:hover {
-            border-color: #007bff;
-            background: #f8f9fa;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-            font-weight: bold;
-        }
-
-        button:hover {
-            background: #0056b3;
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .response {
-            background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        .source-item {
-            background: #f8f9fa;
-            border-left: 4px solid #007bff;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-
-        .source-meta {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .similarity-score {
-            background: #e3f2fd;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            display: inline-block;
-        }
-
-        .search-section {
-            background: white;
-            padding: 30px;
-            margin: 20px 0;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .generation-info {
-            background: #d4edda;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-size: 0.9em;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
-    <div class="container">
-        <h1>Complete Works of William Shakespeare</h1>
-
-        <div class="upload-area" onclick="document.getElementById('file-input').click()">
-            <h3>Upload Documents</h3>
-            <p>Click here to select TXT files</p>
-            <input type="file" id="file-input" multiple accept=".txt">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>2B Not 2B</h1>
+                <span class="subtitle">Shakespeare Works RAG Explorer</span>
+            </div>
+            <div class="nav-links">
+                <a href="#upload" class="nav-link active" onclick="showPage('upload')">Upload Documents</a>
+                <a href="#plays" class="nav-link" onclick="showPage('plays')">Summarize Plays</a>
+                <a href="#chat" class="nav-link" onclick="showPage('chat')">Chat Interface</a>
+            </div>
         </div>
+    </nav>
 
-        <div id="upload-status"></div>
-
-        <div class="search-section">
-            <h3>Ask Questions About Your Documents</h3>
-            <textarea id="question" placeholder="Ask a question about your documents..." rows="4"></textarea>
-            <div>
-                <button onclick="askQuestion()" id="ask-btn">Ask Question</button>
-                <button onclick="clearResponse()" style="background: #6c757d;">Clear</button>
-
+    <div class="pages">
+        <div id="upload-page" class="page active">
+            <div class="container">
+                <h2>Upload Your Shakespeare Documents</h2>
+                <p>Click "Upload Documents" to select TXT files for analysis.</p>
+                <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                    <h3>Upload Documents</h3>
+                    <p>Click here to select TXT files</p>
+                    <input type="file" id="file-input" multiple accept=".txt">
+                </div>
+                <div id="upload-status"></div>
             </div>
         </div>
 
-        <div id="loading" class="loading" style="display: none;">
-            <div class="spinner"></div>
-            <p>Thinking...</p>
+        <div id="chat-page" class="page">
+            <div class="container">
+                <h2>Chat Interface</h2>
+                <div class="search-section">
+                    <h3>Ask Questions About Your Documents</h3>
+                    <textarea id="question" placeholder="Ask a question about your documents..." rows="4"></textarea>
+                    <div>
+                        <button onclick="askQuestion()" id="ask-btn">Ask Question</button>
+                        <button onclick="clearResponse()" style="background: #6c757d;">Clear</button>
+                    </div>
+                </div>
+                <div id="response" class="response" style="display: none;">
+                    <h3>Response</h3>
+                    <div id="response-content"></div>
+                </div>
+            </div>
         </div>
 
-        <div id="response" class="response" style="display: none;"></div>
-
-
+        <div id="plays-page" class="page">
+            <div class="container">
+                <h2>Summarize Plays</h2>
+                <div class="category-tabs">
+                    <button class="category-tab active" onclick="showCategory('all')">All</button>
+                    <button class="category-tab" onclick="showCategory('comedy')">Comedy</button>
+                    <button class="category-tab" onclick="showCategory('tragedy')">Tragedy</button>
+                    <button class="category-tab" onclick="showCategory('history')">History</button>
+                    <button class="category-tab" onclick="showCategory('poetry')">Poetry</button>
+                </div>
+                <div class="plays-categories">
+                    <div id="all-plays" class="plays-category active">
+                        <h3>All Shakespeare Works</h3>
+                        <ul>
+                            <li><a href="#" onclick="analyzePlay('All\'s Well That Ends Well', 'comedy')">All's Well That Ends Well</a></li>
+                            <li><a href="#" onclick="analyzePlay('As You Like It', 'comedy')">As You Like It</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Comedy of Errors', 'comedy')">The Comedy of Errors</a></li>
+                            <li><a href="#" onclick="analyzePlay('Cymbeline', 'comedy')">Cymbeline</a></li>
+                            <li><a href="#" onclick="analyzePlay('Love\'s Labours Lost', 'comedy')">Love's Labours Lost</a></li>
+                            <li><a href="#" onclick="analyzePlay('Measure for Measure', 'comedy')">Measure for Measure</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Merry Wives of Windsor', 'comedy')">The Merry Wives of Windsor</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Merchant of Venice', 'comedy')">The Merchant of Venice</a></li>
+                            <li><a href="#" onclick="analyzePlay('A Midsummer Night\'s Dream', 'comedy')">A Midsummer Night's Dream</a></li>
+                            <li><a href="#" onclick="analyzePlay('Much Ado About Nothing', 'comedy')">Much Ado About Nothing</a></li>
+                            <li><a href="#" onclick="analyzePlay('Pericles, Prince of Tyre', 'comedy')">Pericles, Prince of Tyre</a></li>
+                            <li><a href="#" onclick="analyzePlay('Taming of the Shrew', 'comedy')">Taming of the Shrew</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Tempest', 'comedy')">The Tempest</a></li>
+                            <li><a href="#" onclick="analyzePlay('Troilus and Cressida', 'comedy')">Troilus and Cressida</a></li>
+                            <li><a href="#" onclick="analyzePlay('Twelfth Night', 'comedy')">Twelfth Night</a></li>
+                            <li><a href="#" onclick="analyzePlay('Two Gentlemen of Verona', 'comedy')">Two Gentlemen of Verona</a></li>
+                            <li><a href="#" onclick="analyzePlay('Winter\'s Tale', 'comedy')">Winter's Tale</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry IV, Part 1', 'history')">Henry IV, Part 1</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry IV, Part 2', 'history')">Henry IV, Part 2</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry V', 'history')">Henry V</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VI, Part 1', 'history')">Henry VI, Part 1</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VI, Part 2', 'history')">Henry VI, Part 2</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VI, Part 3', 'history')">Henry VI, Part 3</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VIII', 'history')">Henry VIII</a></li>
+                            <li><a href="#" onclick="analyzePlay('King John', 'history')">King John</a></li>
+                            <li><a href="#" onclick="analyzePlay('Richard II', 'history')">Richard II</a></li>
+                            <li><a href="#" onclick="analyzePlay('Richard III', 'history')">Richard III</a></li>
+                            <li><a href="#" onclick="analyzePlay('Antony and Cleopatra', 'tragedy')">Antony and Cleopatra</a></li>
+                            <li><a href="#" onclick="analyzePlay('Coriolanus', 'tragedy')">Coriolanus</a></li>
+                            <li><a href="#" onclick="analyzePlay('Hamlet', 'tragedy')">Hamlet</a></li>
+                            <li><a href="#" onclick="analyzePlay('Julius Caesar', 'tragedy')">Julius Caesar</a></li>
+                            <li><a href="#" onclick="analyzePlay('King Lear', 'tragedy')">King Lear</a></li>
+                            <li><a href="#" onclick="analyzePlay('Macbeth', 'tragedy')">Macbeth</a></li>
+                            <li><a href="#" onclick="analyzePlay('Othello', 'tragedy')">Othello</a></li>
+                            <li><a href="#" onclick="analyzePlay('Romeo and Juliet', 'tragedy')">Romeo and Juliet</a></li>
+                            <li><a href="#" onclick="analyzePlay('Timon of Athens', 'tragedy')">Timon of Athens</a></li>
+                            <li><a href="#" onclick="analyzePlay('Titus Andronicus', 'tragedy')">Titus Andronicus</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Sonnets', 'poetry')">The Sonnets</a></li>
+                            <li><a href="#" onclick="analyzePlay('A Lover\'s Complaint', 'poetry')">A Lover's Complaint</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Rape of Lucrece', 'poetry')">The Rape of Lucrece</a></li>
+                            <li><a href="#" onclick="analyzePlay('Venus and Adonis', 'poetry')">Venus and Adonis</a></li>
+                            <li><a href="#" onclick="analyzePlay('Funeral Elegy by W.S.', 'poetry')">Funeral Elegy by W.S.</a></li>
+                        </ul>
+                    </div>
+                    <div id="comedy-plays" class="plays-category">
+                        <h3>Comedy Plays</h3>
+                        <ul>
+                            <li><a href="#" onclick="analyzePlay('All\'s Well That Ends Well', 'comedy')">All's Well That Ends Well</a></li>
+                            <li><a href="#" onclick="analyzePlay('As You Like It', 'comedy')">As You Like It</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Comedy of Errors', 'comedy')">The Comedy of Errors</a></li>
+                            <li><a href="#" onclick="analyzePlay('Cymbeline', 'comedy')">Cymbeline</a></li>
+                            <li><a href="#" onclick="analyzePlay('Love\'s Labours Lost', 'comedy')">Love's Labours Lost</a></li>
+                            <li><a href="#" onclick="analyzePlay('Measure for Measure', 'comedy')">Measure for Measure</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Merry Wives of Windsor', 'comedy')">The Merry Wives of Windsor</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Merchant of Venice', 'comedy')">The Merchant of Venice</a></li>
+                            <li><a href="#" onclick="analyzePlay('A Midsummer Night\'s Dream', 'comedy')">A Midsummer Night's Dream</a></li>
+                            <li><a href="#" onclick="analyzePlay('Much Ado About Nothing', 'comedy')">Much Ado About Nothing</a></li>
+                            <li><a href="#" onclick="analyzePlay('Pericles, Prince of Tyre', 'comedy')">Pericles, Prince of Tyre</a></li>
+                            <li><a href="#" onclick="analyzePlay('Taming of the Shrew', 'comedy')">Taming of the Shrew</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Tempest', 'comedy')">The Tempest</a></li>
+                            <li><a href="#" onclick="analyzePlay('Troilus and Cressida', 'comedy')">Troilus and Cressida</a></li>
+                            <li><a href="#" onclick="analyzePlay('Twelfth Night', 'comedy')">Twelfth Night</a></li>
+                            <li><a href="#" onclick="analyzePlay('Two Gentlemen of Verona', 'comedy')">Two Gentlemen of Verona</a></li>
+                            <li><a href="#" onclick="analyzePlay('Winter\'s Tale', 'comedy')">Winter's Tale</a></li>
+                        </ul>
+                    </div>
+                    <div id="tragedy-plays" class="plays-category">
+                        <h3>Tragedy Plays</h3>
+                        <ul>
+                            <li><a href="#" onclick="analyzePlay('Antony and Cleopatra', 'tragedy')">Antony and Cleopatra</a></li>
+                            <li><a href="#" onclick="analyzePlay('Coriolanus', 'tragedy')">Coriolanus</a></li>
+                            <li><a href="#" onclick="analyzePlay('Hamlet', 'tragedy')">Hamlet</a></li>
+                            <li><a href="#" onclick="analyzePlay('Julius Caesar', 'tragedy')">Julius Caesar</a></li>
+                            <li><a href="#" onclick="analyzePlay('King Lear', 'tragedy')">King Lear</a></li>
+                            <li><a href="#" onclick="analyzePlay('Macbeth', 'tragedy')">Macbeth</a></li>
+                            <li><a href="#" onclick="analyzePlay('Othello', 'tragedy')">Othello</a></li>
+                            <li><a href="#" onclick="analyzePlay('Romeo and Juliet', 'tragedy')">Romeo and Juliet</a></li>
+                            <li><a href="#" onclick="analyzePlay('Timon of Athens', 'tragedy')">Timon of Athens</a></li>
+                            <li><a href="#" onclick="analyzePlay('Titus Andronicus', 'tragedy')">Titus Andronicus</a></li>
+                        </ul>
+                    </div>
+                    <div id="history-plays" class="plays-category">
+                        <h3>History Plays</h3>
+                        <ul>
+                            <li><a href="#" onclick="analyzePlay('Henry IV, Part 1', 'history')">Henry IV, Part 1</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry IV, Part 2', 'history')">Henry IV, Part 2</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry V', 'history')">Henry V</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VI, Part 1', 'history')">Henry VI, Part 1</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VI, Part 2', 'history')">Henry VI, Part 2</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VI, Part 3', 'history')">Henry VI, Part 3</a></li>
+                            <li><a href="#" onclick="analyzePlay('Henry VIII', 'history')">Henry VIII</a></li>
+                            <li><a href="#" onclick="analyzePlay('King John', 'history')">King John</a></li>
+                            <li><a href="#" onclick="analyzePlay('Richard II', 'history')">Richard II</a></li>
+                            <li><a href="#" onclick="analyzePlay('Richard III', 'history')">Richard III</a></li>
+                        </ul>
+                    </div>
+                    <div id="poetry-plays" class="plays-category">
+                        <h3>Poetry</h3>
+                        <ul>
+                            <li><a href="#" onclick="analyzePlay('The Sonnets', 'poetry')">The Sonnets</a></li>
+                            <li><a href="#" onclick="analyzePlay('A Lover\'s Complaint', 'poetry')">A Lover's Complaint</a></li>
+                            <li><a href="#" onclick="analyzePlay('The Rape of Lucrece', 'poetry')">The Rape of Lucrece</a></li>
+                            <li><a href="#" onclick="analyzePlay('Venus and Adonis', 'poetry')">Venus and Adonis</a></li>
+                            <li><a href="#" onclick="analyzePlay('Funeral Elegy by W.S.', 'poetry')">Funeral Elegy by W.S.</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        document.getElementById('file-input').addEventListener('change', function (e) {
-            const files = e.target.files;
-            for (let file of files) {
-                uploadFile(file);
-            }
-        });
+    <!-- Analysis Result Modal -->
+    <div id="analysis-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modal-title"></h3>
+            <div id="modal-body">
+                <div class="spinner" id="modal-spinner"></div>
+                <div id="modal-result"></div>
+            </div>
+        </div>
+    </div>
 
-        async function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+    <!-- Chunk Data Modal -->
+    <div id="chunk-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeChunkModal()">&times;</span>
+            <h3 id="chunk-modal-title"></h3>
+            <div id="chunk-modal-body">
+                <div class="chunk-content">
+                    <div class="chunk-metadata">
+                        <p><strong>Source:</strong> <span id="chunk-source"></span></p>
+                        <p><strong>Chunk ID:</strong> <span id="chunk-id"></span></p>
+                        <p><strong>Similarity Score:</strong> <span id="chunk-similarity"></span></p>
+                    </div>
+                    <div class="chunk-text" id="chunk-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 
-            document.getElementById('upload-status').innerHTML = `<p>Uploading ${file.name}...</p>`;
-
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-                document.getElementById('upload-status').innerHTML =
-                    `<p style="color: ${result.status === 'success' ? 'green' : 'red'}">${result.message}</p>`;
-
-                if (result.status === 'success') {
-                    setTimeout(() => location.reload(), 1000);
-                }
-            } catch (error) {
-                document.getElementById('upload-status').innerHTML =
-                    `<p style="color: red">Error: ${error.message}</p>`;
-            }
+<script>
+    // Page navigation
+    function showPage(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        if (page === 'upload') {
+            document.getElementById('upload-page').classList.add('active');
+            document.querySelectorAll('.nav-link')[0].classList.add('active');
+        } else if (page === 'chat') {
+            document.getElementById('chat-page').classList.add('active');
+            document.querySelectorAll('.nav-link')[1].classList.add('active');
+        } else if (page === 'plays') {
+            document.getElementById('plays-page').classList.add('active');
+            document.querySelectorAll('.nav-link')[2].classList.add('active');
         }
-        async function askQuestion() {
-            const question = document.getElementById('question').value.trim();
-            if (!question) return;
+    }
 
-            const askBtn = document.getElementById('ask-btn');
-            askBtn.disabled = true;
-            askBtn.textContent = 'Thinking...';
+    // Category tabs for plays
+    function showCategory(category) {
+        document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.plays-category').forEach(cat => cat.classList.remove('active'));
+        document.getElementById(category + '-plays').classList.add('active');
+        document.querySelector(`.category-tab[onclick*="${category}"]`).classList.add('active');
+    }
 
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('response').style.display = 'none';
-
-            const formData = new FormData();
-            formData.append('question', question);
-
-            try {
-                const response = await fetch('/query', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    let sourcesHtml = '';
-                    if (result.sources && result.sources.length > 0) {
-                        sourcesHtml = result.sources.map((source, index) => `
-                            <div class="source-item">
-                                <div class="source-meta">
-                                    <strong>Source ${source.rank || index + 1}:</strong> ${source.metadata.source} 
-                                    (Chunk ${source.metadata.chunk_id + 1})
-                                    <span class="similarity-score">Similarity: ${(source.similarity_score || 0).toFixed(3)}</span>
-                                </div>
-                                <div>${source.content.substring(0, 400)}${source.content.length > 400 ? '...' : ''}</div>
-                            </div>
-                        `).join('');
-                    }
-
-                    let generationInfo = '';
-                    if (result.generation_info) {
-                        const info = result.generation_info;
-                        generationInfo = `
-                            <div class="generation-info">
-                                <strong>Generation Info:</strong><br>
-                                • Status: ${info.status}<br>
-                                • Model: ${info.model_used || 'N/A'}<br>
-                                • Documents used: ${info.docs_used_for_generation || 0}<br>
-                                • Average relevance: ${(info.average_similarity || 0).toFixed(3)}
-                            </div>
-                        `;
-                    }
-
-                    document.getElementById('response').innerHTML = `
-                        <h4>Response:</h4>
-                        <div style="font-size: 1.1em; line-height: 1.6; padding: 15px; background: #f8f9fa; border-radius: 8px; margin: 15px 0;">
-                            ${result.answer.replace(/\n/g, '<br>')}
-                        </div>
-                        ${generationInfo}
-                        <h4>Source Documents (${result.source_count}):</h4>
-                        ${sourcesHtml}
-                    `;
-                    document.getElementById('response').style.display = 'block';
-                } else {
-                    document.getElementById('response').innerHTML =
-                        `<div style="color: #721c24; background: #f8d7da; padding: 15px; border-radius: 8px;">
-                            <strong> Error:</strong> ${result.message}
-                        </div>`;
-                    document.getElementById('response').style.display = 'block';
-                }
-            } catch (error) {
-                document.getElementById('response').innerHTML =
-                    `<div style="color: #721c24; background: #f8d7da; padding: 15px; border-radius: 8px;">
-                        <strong> Network Error:</strong> ${error.message}
-                    </div>`;
-                document.getElementById('response').style.display = 'block';
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                askBtn.disabled = false;
-                askBtn.textContent = 'Ask Question';
-            }
+    // Upload logic (same as before)
+    document.getElementById('file-input').addEventListener('change', function (e) {
+        const files = e.target.files;
+        for (let file of files) {
+            uploadFile(file);
         }
+    });
 
-        function clearResponse() {
-            document.getElementById('response').style.display = 'none';
+    async function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        document.getElementById('upload-status').innerHTML = `<p>Uploading ${file.name}...</p>`;
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            document.getElementById('upload-status').innerHTML =
+                `<p style="color: ${result.status === 'success' ? 'green' : 'red'}">${result.message}</p>`;
+
+            if (result.status === 'success') {
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (error) {
+            document.getElementById('upload-status').innerHTML =
+                `<p style="color: red">Error: ${error.message}</p>`;
+        }
+    }
+
+    // Chat logic
+    async function askQuestion() {
+        const question = document.getElementById('question').value.trim();
+        if (!question) return;
+
+        const askBtn = document.getElementById('ask-btn');
+        const responseDiv = document.getElementById('response');
+        const responseContent = document.getElementById('response-content');
+        
+        // Disable button
+        askBtn.disabled = true;
+        askBtn.textContent = 'Processing...';
+
+        // Show response area with spinner
+        responseDiv.style.display = 'block';
+        responseContent.innerHTML = '<div class="spinner"></div><p>Thinking...</p>';
+
+        const formData = new FormData();
+        formData.append('question', question);
+
+        try {
+            const response = await fetch('/query', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                let sourceInfo = '';
+                if (result.sources && result.sources.length > 0) {
+                    sourceInfo = `<div class="source-info"><small style="color: #6c757d; font-style: italic;">Based on ${result.source_count} source${result.source_count > 1 ? 's' : ''} from uploaded documents.</small></div>`;
+                }
+                
+                // Convert chunk references to clickable links
+                let formattedAnswer = convertChunkReferencesToLinks(result.answer, result.sources);
+                formattedAnswer = formattedAnswer.replace(/\n/g, '<br>');
+                
+                // Store sources for chunk viewing
+                window.currentSources = result.sources || [];
+                
+                // Create source links section
+                let sourceLinks = '';
+                if (result.sources && result.sources.length > 0) {
+                    sourceLinks = '<div class="source-links"><strong>Sources:</strong><br>';
+                    result.sources.forEach((source, index) => {
+                        sourceLinks += `• <a href="#" onclick="viewChunk(${index})" class="chunk-link">${source.metadata.source} (Chunk ${source.metadata.chunk_id + 1})</a><br>`;
+                    });
+                    sourceLinks += '</div>';
+                }
+                
+                responseContent.innerHTML = `
+                    <div class="response-text">${formattedAnswer}</div>
+                    ${sourceLinks}
+                    ${sourceInfo}
+                `;
+            } else {
+                responseContent.innerHTML = `<div class="error">Error: ${result.message}</div>`;
+            }
+        } catch (error) {
+            responseContent.innerHTML = `<div class="error">Network Error: ${error.message}</div>`;
+        } finally {
+            // Re-enable button and restore original text
+            askBtn.disabled = false;
+            askBtn.textContent = 'Ask Question';
             document.getElementById('question').value = '';
         }
-    </script>
-</body>
+    }
+
+    function clearResponse() {
+        document.getElementById('response').style.display = 'none';
+        document.getElementById('question').value = '';
+        document.getElementById('response-content').innerHTML = '';
+    }
+
+    // Analyze play logic
+    function analyzePlay(play, category) {
+        document.getElementById('analysis-modal').style.display = 'block';
+        document.getElementById('modal-title').textContent = play + " (" + category.charAt(0).toUpperCase() + category.slice(1) + ")";
+        document.getElementById('modal-result').innerHTML = '';
+        document.getElementById('modal-spinner').style.display = 'block';
+
+        // Example: you can change the prompt as needed
+        const prompt = `Summarize the play "${play}" by William Shakespeare.`;
+
+        fetch('/query', {
+            method: 'POST',
+            body: new URLSearchParams({ question: prompt }),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        .then(res => res.json())
+        .then(result => {
+            document.getElementById('modal-spinner').style.display = 'none';
+            if (result.status === 'success') {
+                // Format the response with better structure
+                let formattedResponse = result.answer;
+                
+                // Parse the response to extract main content and sources
+                let mainContent = formattedResponse;
+                let embeddedSourceInfo = '';
+                
+                // Check for different source patterns in the response
+                if (formattedResponse.includes('**Sources Referenced:**')) {
+                    const parts = formattedResponse.split('**Sources Referenced:**');
+                    mainContent = parts[0].trim();
+                    embeddedSourceInfo = parts[1].trim();
+                } else if (formattedResponse.includes('**Source:**')) {
+                    const parts = formattedResponse.split('**Source:**');
+                    mainContent = parts[0].trim();
+                    embeddedSourceInfo = parts[1].trim();
+                } else if (formattedResponse.includes('Sources:')) {
+                    const parts = formattedResponse.split('Sources:');
+                    mainContent = parts[0].trim();
+                    embeddedSourceInfo = 'Sources:' + parts[1].trim();
+                }
+                
+                // Convert chunk references to clickable links
+                mainContent = convertChunkReferencesToLinks(mainContent, result.sources);
+                
+                // Format bullet points and lists
+                mainContent = mainContent
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                    .replace(/\n\*\s/g, '\n• ') // Convert * to bullet points
+                    .replace(/\n•\s/g, '\n• ') // Ensure proper bullet formatting
+                    .replace(/\n/g, '<br>');
+                
+                // Create source information from structured data (preferred over embedded)
+                let sourceInfo = '';
+                if (result.sources && result.sources.length > 0) {
+                    sourceInfo = `Based on ${result.source_count} source${result.source_count > 1 ? 's' : ''} from the uploaded documents.`;
+                    
+                    // Add specific source details with clickable links
+                    if (result.sources.length > 0) {
+                        sourceInfo += '\n\nSources:';
+                        result.sources.forEach((source, index) => {
+                            sourceInfo += `\n• <a href="#" onclick="viewChunk(${index})" class="chunk-link">${source.metadata.source} (Chunk ${source.metadata.chunk_id + 1})</a>`;
+                        });
+                    }
+                }
+                
+                // Only use embedded source info if no structured data is available
+                let finalSourceInfo = '';
+                if (sourceInfo) {
+                    // Use structured source data (preferred)
+                    finalSourceInfo = sourceInfo;
+                } else if (embeddedSourceInfo) {
+                    // Fallback to embedded source info
+                    finalSourceInfo = embeddedSourceInfo
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\n\*\s/g, '\n• ')
+                        .replace(/\n•\s/g, '\n• ')
+                        .replace(/\n/g, '<br>');
+                }
+                
+                // Store sources data for chunk viewing
+                window.currentSources = result.sources || [];
+                
+                document.getElementById('modal-result').innerHTML = `
+                    <div class="modal-content-wrapper">
+                        <div class="modal-main-content">
+                            ${mainContent}
+                        </div>
+                        ${finalSourceInfo ? `
+                            <div class="modal-source-info">
+                                <strong>Source Information:</strong><br>
+                                ${finalSourceInfo.replace(/\n/g, '<br>')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                document.getElementById('modal-result').innerHTML = `<div class="error">Error: ${result.message}</div>`;
+            }
+        })
+        .catch(error => {
+            document.getElementById('modal-spinner').style.display = 'none';
+            document.getElementById('modal-result').innerHTML = `<div class="error">Network Error: ${error.message}</div>`;
+        });
+    }
+
+    // Convert chunk references to clickable links
+    function convertChunkReferencesToLinks(text, sources) {
+        if (!sources || sources.length === 0) {
+            return text;
+        }
+        
+        // Create a map of chunk IDs to source indices
+        const chunkMap = {};
+        sources.forEach((source, index) => {
+            const chunkId = source.metadata.chunk_id + 1;
+            chunkMap[chunkId] = index;
+        });
+        
+        // Replace chunk references with clickable links
+        // Handle both formats: (Chunk X) and **Chunk X:**
+        let processedText = text;
+        
+        // Handle **Chunk X:** format
+        processedText = processedText.replace(/\*\*Chunk (\d+):\*\*/g, (match, chunkId) => {
+            const sourceIndex = chunkMap[parseInt(chunkId)];
+            if (sourceIndex !== undefined) {
+                return `<strong><a href="#" onclick="viewChunk(${sourceIndex})" class="chunk-link">Chunk ${chunkId}:</a></strong>`;
+            }
+            return match; // Keep original if chunk not found
+        });
+        
+        // Handle (Chunk X) format
+        processedText = processedText.replace(/\(Chunk (\d+)\)/g, (match, chunkId) => {
+            const sourceIndex = chunkMap[parseInt(chunkId)];
+            if (sourceIndex !== undefined) {
+                return `(<a href="#" onclick="viewChunk(${sourceIndex})" class="chunk-link">Chunk ${chunkId}</a>)`;
+            }
+            return match; // Keep original if chunk not found
+        });
+        
+        return processedText;
+    }
+
+    // View chunk data
+    function viewChunk(chunkIndex) {
+        if (!window.currentSources || !window.currentSources[chunkIndex]) {
+            alert('Chunk data not available');
+            return;
+        }
+        
+        const chunk = window.currentSources[chunkIndex];
+        
+        // Show loading state
+        document.getElementById('chunk-modal-title').textContent = `Loading chunk ${chunk.metadata.chunk_id + 1} from ${chunk.metadata.source}...`;
+        document.getElementById('chunk-source').textContent = '';
+        document.getElementById('chunk-id').textContent = '';
+        document.getElementById('chunk-similarity').textContent = '';
+        document.getElementById('chunk-text').innerHTML = '<div class="spinner"></div>';
+        
+        document.getElementById('chunk-modal').style.display = 'block';
+        
+        // Fetch chunk data from API
+        fetch(`/chunk/${encodeURIComponent(chunk.metadata.source)}/${chunk.metadata.chunk_id}`)
+            .then(res => res.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    const chunkData = result.chunk;
+                    document.getElementById('chunk-modal-title').textContent = `Chunk ${chunkData.chunk_id + 1} from ${chunkData.source}`;
+                    document.getElementById('chunk-source').textContent = chunkData.source;
+                    document.getElementById('chunk-id').textContent = chunkData.chunk_id + 1;
+                    document.getElementById('chunk-similarity').textContent = (chunk.similarity_score * 100).toFixed(1) + '%';
+                    document.getElementById('chunk-text').innerHTML = chunkData.content.replace(/\n/g, '<br>');
+                } else {
+                    document.getElementById('chunk-modal-title').textContent = 'Error Loading Chunk';
+                    document.getElementById('chunk-text').innerHTML = `<div class="error">Error: ${result.message}</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('chunk-modal-title').textContent = 'Error Loading Chunk';
+                document.getElementById('chunk-text').innerHTML = `<div class="error">Network Error: ${error.message}</div>`;
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('analysis-modal').style.display = 'none';
+    }
+
+    function closeChunkModal() {
+        document.getElementById('chunk-modal').style.display = 'none';
+    }
+
+    // Default to upload page
+    showPage('upload');
+    showCategory('comedy');
+</script>
+</html>
