@@ -1,12 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2B Not 2B</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            text-align: center;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+    </style>
 </head>
+
 <body>
-    <h1>Complete Works of William Shakespeare</h1>
+    <div class="container">
+        <h1>Complete Works of William Shakespeare</h1>
+
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+            <h3>Upload Documents</h3>
+            <p>Click here to select TXT files</p>
+            <input type="file" id="file-input" multiple accept=".txt">
+        </div>
+
+        <div id="upload-status"></div>
+    </div>
+
+    <script>
+        document.getElementById('file-input').addEventListener('change', function (e) {
+            const files = e.target.files;
+            for (let file of files) {
+                uploadFile(file);
+            }
+        });
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('upload-status').innerHTML = `<p>Uploading ${file.name}...</p>`;
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                document.getElementById('upload-status').innerHTML =
+                    `<p style="color: ${result.status === 'success' ? 'green' : 'red'}">${result.message}</p>`;
+
+                if (result.status === 'success') {
+                    setTimeout(() => location.reload(), 1000);
+                }
+            } catch (error) {
+                document.getElementById('upload-status').innerHTML =
+                    `<p style="color: red">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
 </body>

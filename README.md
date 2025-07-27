@@ -35,3 +35,8 @@ cd 2Bnot2B
 docker compose up -d
 ```
 
+# Key Design TradeOff
+## Document Processing 
+1. Chunk Size and Overlap for storing data
+    - Current 1000 Larger Size more context, less precision
+    - Overlap 200 
