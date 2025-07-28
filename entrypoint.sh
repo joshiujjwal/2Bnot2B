@@ -7,7 +7,9 @@ ollama serve &
 sleep 10
 
 # Pull the model for LLMs
-ollama pull gemma3n:e4b
+ollama pull gemma3:1b
+
+sleep 10
 
 # Start the web application
 python app/main.py

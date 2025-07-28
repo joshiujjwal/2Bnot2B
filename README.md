@@ -25,6 +25,7 @@ Local Retrieval-Augmented Generation (RAG) on The Complete Works of William Shak
 - [docker-compose-plugin](https://docs.docker.com/compose/install/)
 
 # Running application
+Responses are slower with docker with ollama resources
 1. Clone 
 ```bash
 git clone https://github.com/joshiujjwal/2Bnot2B.git
@@ -37,8 +38,18 @@ docker compose up -d
 3. Navigate to http://localhost:8000 
 4. [Upload Documents](http://localhost:8000/#upload)
  - Select input_data/julius_caesar/julius-caesar-full.txt file
+   ![Upload](images/upload.png)
 5. [Summarize Plays](http://localhost:8000/#plays)
-- Tragedy > Julius Caesar
+ - Select Tragedy > Julius Caesar
+   ![Plays](images/plays.png)
+ - Summary Modal
+   ![Summary](images/summary.png)
+ - Chunk Modal
+   ![Summary](images/chunk.png)
+6. [Chat](http:/localhost:8000/#chat)
+ - Ask/type question 
+   ![Chat](images/chat.png)
+ 
 
 # Key Design TradeOff
 ## Document Processing 
@@ -76,3 +87,10 @@ docker compose up -d
  - No RAG background
  - Understood from YT and LLM Chats
  - Used Cursor for code generation assistance
+
+ ## Additional Features
+ - Option to select models from UI or compare between models
+ - Already pre setup data from plays
+ - Unit tests for flask/rag implementation
+ - Support of better embedding and LLM via APIs
+ - Service status for OLLAMA in UI

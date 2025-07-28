@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RAG:
-    def __init__(self, embedding_model_name="sentence-transformers/all-MiniLM-L6-v2", ollama_model="gemma3n:e4b", ollama_url="http://localhost:11434"):
+    def __init__(self, embedding_model_name="sentence-transformers/all-MiniLM-L6-v2", ollama_model="gemma3:1b", ollama_url="http://localhost:11434"):
         """Initialize RAG system components"""
         logger.info("Initializing RAG system...")
         self.processed_documents = {}  # Track processed docs
@@ -271,11 +271,11 @@ class RAG:
                     'options': {
                         'temperature': 0.7,
                         'top_p': 0.5,
-                        'max_tokens': 500,
+                        'num_predict': 500,
                         'stop': ['Context:', 'Question:']
                     }
                 },
-                timeout=120
+                timeout=300
             )
             
             if response.status_code == 200:
